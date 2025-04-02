@@ -12,14 +12,21 @@ async function cargarDatos() {
         const response = await fetch(`consult.php?matricula=${matricula}`);
         const data = await response.json();
 
+        // Limpiar gráfico anterior si existe
+        const chartElement = document.getElementById("creditos");
+        if (window.creditosChart) {
+            window.creditosChart.dispose(); // Destruir instancia anterior
+        }
+
         // Verificar si hay datos
         if (!data.success || data.info.length === 0) {
             throw new Error("No se encontraron datos para esta matrícula");
         }
 
         // Mostrar tabla y gráfico con los mismos datos
-        mostrarTabla(data);
         mostrarCreditos(data.creditos);
+        mostrarTabla(data);
+        
 
     } catch (error) {
         console.error("Error:", error);
@@ -141,14 +148,14 @@ function mostrarCreditos(creditosData) {
             ]
         };
 
-        // Inicializar y renderizar gráfico
-        const chart = echarts.init(document.getElementById("creditos"));
-        chart.setOption(options);
-        
-        // Redimensionar al cambiar tamaño de ventana
-        window.addEventListener('resize', function() {
-            chart.resize();
-        });
+         // Crear o actualizar gráfico
+         window.creditosChart = echarts.init(document.getElementById("creditos"));
+         window.creditosChart.setOption(options);
+         
+         // Redimensionar al cambiar tamaño de ventana
+         window.addEventListener('resize', function() {
+             window.creditosChart.resize();
+         });
 
     } catch (error) {
         console.error("Error al mostrar créditos:", error);
