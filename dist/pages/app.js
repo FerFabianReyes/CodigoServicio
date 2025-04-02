@@ -8,7 +8,7 @@ async function cargarDatos() {
 
     try {
         const response = await fetch(`consult.php?matricula=${matricula}`);
-        const data = await response.json();
+        const    data = await response.json();
 
         mostrarTabla(data); // Llamar a la función para mostrar los datos
     } catch (error) {

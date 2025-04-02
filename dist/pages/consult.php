@@ -11,7 +11,7 @@ $response = [];
 
 if (!empty($matricula)) {
     // Filtrar los datos por la matrícula ingresada
-    $queryEgresado = "SELECT ALUMNO FROM matricula WHERE CICLOEGR IS NOT NULL AND CICLOEGR <> '' AND Alumno = '$matricula'";
+    $queryEgresado = "SELECT ALUMNO FROM matricula WHERE CICLOEGR IS NOT NULL AND CICLOEGR != '' AND Alumno = '$matricula'";
     $resultEgresado = $conn->query($queryEgresado);
     if ($resultEgresado->num_rows > 0) {
         // El alumno ha egresado
