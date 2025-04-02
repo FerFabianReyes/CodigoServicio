@@ -13,6 +13,11 @@ if (!empty($matricula)) {
     // Filtrar los datos por la matrícula ingresada
     $queryEgresado = "SELECT ALUMNO FROM matricula WHERE CICLOEGR IS NOT NULL AND CICLOEGR != '' AND Alumno = '$matricula'";
     $resultEgresado = $conn->query($queryEgresado);
+    
+    //Hacer la consulta para
+    $sqlCreditos = "SELECT creditos from matricula where alumno = '$matricula'" ;
+    $resultCreditos = $conn->query($sqlCreditos);
+    
     if ($resultEgresado->num_rows > 0) {
         // El alumno ha egresado
         $sqlInfo = "SELECT * from vInfoAlumnoGeneralEgresado WHERE Alumno = '$matricula'";
@@ -21,16 +26,13 @@ if (!empty($matricula)) {
         $sqlInfo = "SELECT * from vInfoAlumnoGeneral WHERE Alumno = '$matricula'";
     }
     
-} 
+} else {
+    $sqlInfo = "SELECT * from vInfoAlumnoGeneralEgresado WHERE Alumno = ''";
+}
 
 $resultInfo = $conn->query($sqlInfo);
 $response['info'] = $resultInfo->fetch_all(MYSQLI_ASSOC);
 
-
-
-
-$sqlCreditos = "SELECT creditos from matricula where alumno = '$matricula'" ;
-$resultCreditos = $conn->query($sqlCreditos);
 $response['creditos'] = $resultCreditos->fetch_all(MYSQLI_ASSOC);
 
 

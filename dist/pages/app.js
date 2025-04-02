@@ -122,7 +122,6 @@ const creditos = async (matricula) => {
 
 const initCharts = async () => {
     const chartCreditos = echarts.init(document.getElementById("creditos"));
-
     const optionsCreditos = await creditos();  // tener los datos antes de hacer la grafica
     chartCreditos.setOption(optionsCreditos);
     chartCreditos.resize();
