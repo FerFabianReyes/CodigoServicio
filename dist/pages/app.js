@@ -128,7 +128,3 @@ const initCharts = async () => {
     chartCreditos.resize();
 
 };
-
-window.addEventListener("load", () => {
-    initCharts();
-});
