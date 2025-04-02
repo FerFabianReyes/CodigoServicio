@@ -1,4 +1,3 @@
-
 async function cargarDatos() {
     const matricula = document.getElementById("matriculaInput").value.trim();
     if (matricula === "") {
@@ -7,59 +6,88 @@ async function cargarDatos() {
     }
 
     try {
-        const response = await fetch(`consult.php?matricula=${matricula}`);
-        const    data = await response.json();
+        // Mostrar carga
+        document.getElementById("tablaDatos").innerHTML = '<div class="loader">Cargando datos...</div>';
+        document.getElementById("creditos").innerHTML = '<div class="loader">Cargando créditos...</div>';
 
-        mostrarTabla(data); // Llamar a la función para mostrar los datos
-        initCharts(matricula);
+        // Una sola llamada a la API
+        const response = await fetch(`consult.php?matricula=${matricula}`);
+        const data = await response.json();
+
+        // Verificar si hay datos
+        if (!data.success || data.info.length === 0) {
+            throw new Error("No se encontraron datos para esta matrícula");
+        }
+
+        // Mostrar tabla y gráfico con los mismos datos
+        mostrarTabla(data);
+        mostrarCreditos(data.creditos);
+
     } catch (error) {
-        console.error("Error al obtener los datos:", error);
+        console.error("Error:", error);
+        document.getElementById("tablaDatos").innerHTML = `<div class="error">${error.message}</div>`;
+        document.getElementById("creditos").innerHTML = '<div class="error">Error al cargar créditos</div>';
     }
 }
 
 function mostrarTabla(data) {
-    let tablaHTML = "<table class='table table-hover text-nowra' ><tr><th>Matricula</th><th>Ciclo de ingreso</th><th>Ciclo actual</th><th>Ciclo Egreso</th><th>Semestre Actual</th><th>Creditos</th><th>Promedio Actual</th></tr>";
+    if (!data.info || data.info.length === 0) {
+        document.getElementById("tablaDatos").innerHTML = '<div class="no-data">No se encontraron datos del alumno</div>';
+        return;
+    }
+
+    let tablaHTML = `
+        <table class='table table-hover text-nowra'>
+            <thead>
+                <tr>
+                    <th>Matrícula</th>
+                    <th>Ciclo de ingreso</th>
+                    <th>Ciclo actual</th>
+                    <th>Ciclo Egreso</th>
+                    <th>Semestre Actual</th>
+                    <th>Créditos</th>
+                    <th>Promedio Actual</th>
+                </tr>
+            </thead>
+            <tbody>`;
 
     data.info.forEach(item => {
-        tablaHTML += `<tr>
-            <td>${item.alumno}</td>
-            <td>${item.ciclo}</td>
-            <td>${item.cicloActual || '-'}</td>  <!-- Evita valores nulos -->
-            <td>${item.cicloegr || '-'}</td>
-            <td>${item.semestreActual || '-'}</td>
-            <td>${item.creditos}</td>
-            <td>${item.promedioFinal}</td>
-        </tr>`;
+        tablaHTML += `
+            <tr>
+                <td>${item.alumno || '-'}</td>
+                <td>${item.ciclo || '-'}</td>
+                <td>${item.cicloActual || '-'}</td>
+                <td>${item.cicloegr || '-'}</td>
+                <td>${item.semestreActual || '-'}</td>
+                <td>${item.creditos || '0'}</td>
+                <td>${item.promedioFinal || '-'}</td>
+            </tr>`;
     });
 
-    tablaHTML += "</table>";
-
+    tablaHTML += `</tbody></table>`;
     document.getElementById("tablaDatos").innerHTML = tablaHTML;
 }
 
-const creditos = async (matricula) => {
+function mostrarCreditos(creditosData) {
     try {
-        const response = await fetch(`consult.php?matricula=${matricula}`);
-        const data = await response.json();
-
-        if (!data.creditos) {
-            console.error("No hay datos de créditos.");
-            return null;
+        // Verificar si hay datos de créditos
+        if (!creditosData || creditosData.length === 0) {
+            document.getElementById("creditos").innerHTML = '<div class="no-data">No se encontraron datos de créditos</div>';
+            return;
         }
 
-        const creditosData = data.creditos.map(item => item.creditos);
-        console.log("Créditos extraídos:", creditosData); 
+        // Calcular total de créditos
+        const totalCreditos = creditosData.reduce((total, item) => total + (parseInt(item.creditos) || 0, 0));
 
-        const totalCreditos = creditosData.reduce((acc, curr) => acc + curr, 0);
-
-        return {
+        // Configuración del gráfico
+        const options = {
             tooltip: {
                 trigger: 'axis',
-                axisPointer: {
-                    type: 'shadow'
-                }
+                axisPointer: { type: 'shadow' }
             },
-            legend: {},
+            legend: {
+                data: ['Créditos cursados', 'Créditos por cursar']
+            },
             grid: {
                 left: '3%',
                 right: '4%',
@@ -68,9 +96,7 @@ const creditos = async (matricula) => {
             },
             xAxis: {
                 type: 'value',
-                axisLabel: {
-                    show: false 
-                }
+                max: 500
             },
             yAxis: {
                 type: 'category',
@@ -82,48 +108,47 @@ const creditos = async (matricula) => {
                     type: 'bar',
                     stack: 'total',
                     label: { show: true },
-                    emphasis: { focus: 'series' },
-                    data: [totalCreditos]
+                    data: [totalCreditos],
+                    itemStyle: { color: '#5470C6' }
                 },
                 {
                     name: 'Créditos por cursar',
                     type: 'bar',
                     stack: 'total',
                     label: { show: true },
-                    emphasis: { focus: 'series' },
-                    data: [470 - totalCreditos]
+                    data: [470 - totalCreditos],
+                    itemStyle: { color: '#91CC75' }
                 },
                 {
-                    name: 'Límite de créditos',
-                    color: 'green',
                     type: 'line',
                     markLine: {
                         silent: true,
                         label: {
                             show: true,
                             position: 'end',
-                            formatter: 'Créditos máximos'
+                            formatter: 'Límite: {c}'
                         },
                         lineStyle: {
                             type: 'dashed',
-                            color: 'green'
+                            color: '#EE6666'
                         },
-                        data: [{ xAxis: 500 }]
+                        data: [{ xAxis: 470 }]
                     }
                 }
             ]
         };
 
+        // Inicializar y renderizar gráfico
+        const chart = echarts.init(document.getElementById("creditos"));
+        chart.setOption(options);
+        
+        // Redimensionar al cambiar tamaño de ventana
+        window.addEventListener('resize', function() {
+            chart.resize();
+        });
+
     } catch (error) {
-        console.error("Error al obtener los datos:", error);
+        console.error("Error al mostrar créditos:", error);
+        document.getElementById("creditos").innerHTML = '<div class="error">Error al mostrar créditos</div>';
     }
-};
-
-
-const initCharts = async (matricula) => {
-    const chartCreditos = echarts.init(document.getElementById("creditos"));
-    const optionsCreditos = await creditos(matricula);  // tener los datos antes de hacer la grafica
-    chartCreditos.setOption(optionsCreditos);
-    chartCreditos.resize();
-
-};
+}

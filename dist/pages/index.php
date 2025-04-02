@@ -543,14 +543,13 @@
 
               <div class="col-lg-12 connectedSortable">
               <div class="card mb-8">
-                <div class="card-header">
-                  <h3 class="card-title">Creditos</h3>
-                </div>
-                <div class="row my-4">
-                  <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
-                    <div id="creditos" class="chart"></div>
+               <div class="card-header">
+                 <h3 class="card-title">Creditos</h3>
+                 </div>
+                    <div class="card-body">
+                       <div id="creditos" style="width: 100%; height: 400px;"></div>
+                     </div>
                   </div>
-                </div>
               </div>
             </div> 
         </div>
