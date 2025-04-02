@@ -6,11 +6,9 @@ async function cargarDatos() {
     }
 
     try {
-        // Mostrar carga
         document.getElementById("tablaDatos").innerHTML = '<div class="loader">Cargando datos...</div>';
         document.getElementById("creditos").innerHTML = '<div class="loader">Cargando créditos...</div>';
 
-        // Una sola llamada a la API
         const response = await fetch(`consult.php?matricula=${matricula}`);
         const data = await response.json();
 
@@ -54,13 +52,13 @@ function mostrarTabla(data) {
     data.info.forEach(item => {
         tablaHTML += `
             <tr>
-                <td>${item.alumno || '-'}</td>
-                <td>${item.ciclo || '-'}</td>
+                <td>${item.alumno}</td>
+                <td>${item.ciclo}</td>
                 <td>${item.cicloActual || '-'}</td>
                 <td>${item.cicloegr || '-'}</td>
                 <td>${item.semestreActual || '-'}</td>
-                <td>${item.creditos || '0'}</td>
-                <td>${item.promedioFinal || '-'}</td>
+                <td>${item.creditos}</td>
+                <td>${item.promedioFinal}</td>
             </tr>`;
     });
 
@@ -76,10 +74,15 @@ function mostrarCreditos(creditosData) {
             return;
         }
 
-        // Calcular total de créditos
-        const totalCreditos = creditosData.reduce((total, item) => total + (parseInt(item.creditos) || 0, 0));
+        const totalCreditos = Array.isArray(creditosData) 
+        ? creditosData.reduce((sum, item) => sum + (parseInt(item?.creditos) || 0), 0)
+        : 0;
 
-        // Configuración del gráfico
+        const faltantes = 470 - totalCreditos;
+        if (totalCreditos >= 470) {
+            faltantes = 0;
+        }
+
         const options = {
             tooltip: {
                 trigger: 'axis',
@@ -116,7 +119,7 @@ function mostrarCreditos(creditosData) {
                     type: 'bar',
                     stack: 'total',
                     label: { show: true },
-                    data: [470 - totalCreditos],
+                    data: [faltantes],
                     itemStyle: { color: '#91CC75' }
                 },
                 {
@@ -126,7 +129,7 @@ function mostrarCreditos(creditosData) {
                         label: {
                             show: true,
                             position: 'end',
-                            formatter: 'Límite: {c}'
+                            formatter: 'Necesarios: {c}'
                         },
                         lineStyle: {
                             type: 'dashed',
