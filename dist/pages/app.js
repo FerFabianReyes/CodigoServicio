@@ -120,9 +120,9 @@ const creditos = async (matricula) => {
 };
 
 
-const initCharts = async () => {
+const initCharts = async (matricula) => {
     const chartCreditos = echarts.init(document.getElementById("creditos"));
-    const optionsCreditos = await creditos();  // tener los datos antes de hacer la grafica
+    const optionsCreditos = await creditos(matricula);  // tener los datos antes de hacer la grafica
     chartCreditos.setOption(optionsCreditos);
     chartCreditos.resize();
 
