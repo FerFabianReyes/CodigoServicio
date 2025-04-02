@@ -11,6 +11,7 @@ async function cargarDatos() {
         const    data = await response.json();
 
         mostrarTabla(data); // Llamar a la función para mostrar los datos
+        initCharts(matricula);
     } catch (error) {
         console.error("Error al obtener los datos:", error);
     }
