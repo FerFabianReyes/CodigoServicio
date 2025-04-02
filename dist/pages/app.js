@@ -41,18 +41,15 @@ const creditos = async (matricula) => {
         const response = await fetch(`consult.php?matricula=${matricula}`);
         const data = await response.json();
 
-        console.log("Datos obtenidos:", data); // 👈 Agrega esto para ver si llegan datos
-
         if (!data.creditos) {
             console.error("No hay datos de créditos.");
             return null;
         }
 
         const creditosData = data.creditos.map(item => item.creditos);
-        console.log("Créditos extraídos:", creditosData); // 👈 Agrega esto para ver los créditos extraídos
+        console.log("Créditos extraídos:", creditosData); 
 
         const totalCreditos = creditosData.reduce((acc, curr) => acc + curr, 0);
-        console.log("Total de créditos:", totalCreditos); // 👈 Verificar si está sumando bien
 
         return {
             tooltip: {
